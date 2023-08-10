@@ -26,8 +26,18 @@ public class PartidaXadrez {
 		tabuleiro.lugarpeça(peça, new PosiçãoXadrez(coluna, linha).toPosição());
 	}
 	private void iniciopartida() {
-		colocarNovaPeça('b', 6, new Torre(tabuleiro, Cor.branco));
-		colocarNovaPeça('e', 8, new Rei(tabuleiro, Cor.preto));
-		colocarNovaPeça('e', 1, new Rei(tabuleiro, Cor.branco));
+		colocarNovaPeça('c', 1, new Torre(tabuleiro, Cor.branco));
+		colocarNovaPeça('c', 2, new Torre(tabuleiro, Cor.branco));
+		colocarNovaPeça('d', 2, new Torre(tabuleiro, Cor.branco));
+		colocarNovaPeça('e', 2, new Torre(tabuleiro, Cor.branco));
+		colocarNovaPeça('e', 1, new Torre(tabuleiro, Cor.branco));
+		colocarNovaPeça('d', 1, new Rei(tabuleiro, Cor.branco));
+
+		colocarNovaPeça('c', 7, new Torre(tabuleiro, Cor.preto));
+		colocarNovaPeça('c', 8, new Torre(tabuleiro, Cor.preto));
+		colocarNovaPeça('d', 7, new Torre(tabuleiro, Cor.preto));
+		colocarNovaPeça('e', 7, new Torre(tabuleiro, Cor.preto));
+		colocarNovaPeça('e', 8, new Torre(tabuleiro, Cor.preto));
+		colocarNovaPeça('d', 8, new Rei(tabuleiro, Cor.preto));
 	}
 }
