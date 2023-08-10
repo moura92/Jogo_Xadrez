@@ -20,7 +20,7 @@ public class UI {
 		if (peça == null) {
 			System.out.print("-");
 		}else {
-			System.out.println(peça);
+			System.out.print(peça);
 		}
 		System.out.print(" ");
 	}
