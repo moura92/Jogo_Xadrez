@@ -7,48 +7,53 @@ import xadrez.peças.Rei;
 import xadrez.peças.Torre;
 
 public class PartidaXadrez {
-	
+
 	private Tabuleiro tabuleiro;
-	
+
 	public PartidaXadrez() {
 		tabuleiro = new Tabuleiro(8, 8);
 		iniciopartida();
 	}
+
 	public PeçaXadrez[][] getPeças() {
 		PeçaXadrez[][] matriz = new PeçaXadrez[tabuleiro.getLinhas()][tabuleiro.getColunas()];
-		for (int i=0; i < tabuleiro.getLinhas(); i++) {
-			for (int j=0; j<tabuleiro.getColunas(); j++) {
+		for (int i = 0; i < tabuleiro.getLinhas(); i++) {
+			for (int j = 0; j < tabuleiro.getColunas(); j++) {
 				matriz[i][j] = (PeçaXadrez) tabuleiro.peça(i, j);
 			}
 		}
 		return matriz;
 	}
-	
+
 	public PeçaXadrez jogadaXadrezDesempenho(PosiçãoXadrez posiçãoOrigem, PosiçãoXadrez posiçãoDestino) {
 		Posição origem = posiçãoOrigem.toPosição();
 		Posição destino = posiçãoDestino.toPosição();
 		validarPosiçãoOrigem(origem);
 		Peça peçaCapturada = fazerMover(origem, destino);
-		return (PeçaXadrez)peçaCapturada;
+		return (PeçaXadrez) peçaCapturada;
 	}
-	
+
 	private Peça fazerMover(Posição origem, Posição destino) {
 		Peça p = tabuleiro.removerPeça(origem);
 		Peça peçaCapturada = tabuleiro.removerPeça(destino);
 		tabuleiro.lugarpeça(p, destino);
 		return peçaCapturada;
 	}
-	
+
 	private void validarPosiçãoOrigem(Posição posição) {
-		if(!tabuleiro.temUmaPeça(posição)) {
+		if (!tabuleiro.temUmaPeça(posição)) {
 			throw new ExceçãoXadrez("Não há peça na posição de origem");
 		}
-		
+		if (!tabuleiro.peça(posição).existeMovimentoPossivel()) {
+			throw new ExceçãoXadrez("Não há movimentos possíveis para a peça escolhida");
+		}
+
 	}
-	
+
 	private void colocarNovaPeça(char coluna, int linha, PeçaXadrez peça) {
 		tabuleiro.lugarpeça(peça, new PosiçãoXadrez(coluna, linha).toPosição());
 	}
+
 	private void iniciopartida() {
 		colocarNovaPeça('c', 1, new Torre(tabuleiro, Cor.branco));
 		colocarNovaPeça('c', 2, new Torre(tabuleiro, Cor.branco));
