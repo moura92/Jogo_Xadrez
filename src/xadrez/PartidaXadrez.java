@@ -8,11 +8,23 @@ import xadrez.peças.Torre;
 
 public class PartidaXadrez {
 
+	private int vez;
+	private Cor jogadorAtual;
 	private Tabuleiro tabuleiro;
 
 	public PartidaXadrez() {
 		tabuleiro = new Tabuleiro(8, 8);
+		vez = 1;
+		jogadorAtual = Cor.branco;
 		iniciopartida();
+	}
+	
+	public int getVez() {
+		return vez;
+	}
+	
+	public Cor getJogadorAtual() {
+		return jogadorAtual;
 	}
 
 	public PeçaXadrez[][] getPeças() {
@@ -37,6 +49,7 @@ public class PartidaXadrez {
 		validarPosiçãoOrigem(origem);
 		validarPosiçãoDestino(origem, destino);
 		Peça peçaCapturada = fazerMover(origem, destino);
+		proximaVez();
 		return (PeçaXadrez) peçaCapturada;
 	}
 
@@ -51,6 +64,10 @@ public class PartidaXadrez {
 		if (!tabuleiro.temUmaPeça(posição)) {
 			throw new ExceçãoXadrez("Não há peça na posição de origem");
 		}
+		if (jogadorAtual != ((PeçaXadrez)tabuleiro.peça(posição)).getCor()) {
+							 // Downcast
+			throw new ExceçãoXadrez("A peça escolhida não é sua");
+		}
 		if (!tabuleiro.peça(posição).existeMovimentoPossivel()) {
 			throw new ExceçãoXadrez("Não há movimentos possíveis para a peça escolhida");
 		}
@@ -60,6 +77,13 @@ public class PartidaXadrez {
 		if (!tabuleiro.peça(origem).movimentoPossivel(destino)) {
 			throw new ExceçãoXadrez("A peça escolhida não pode se mover para a posição de destino");
 		}
+	}
+	
+	private void proximaVez() {
+		vez++;
+		jogadorAtual = (jogadorAtual == Cor.branco) ? Cor.preto : Cor.branco;
+					 // OPERAÇÃO CONDICIONAL TERNARIA:
+					 // se o jogadorAtual for igual a Cor.branco entao ele vai ser Cor.preto caso contrario vai Cor.branco
 	}
 
 	private void colocarNovaPeça(char coluna, int linha, PeçaXadrez peça) {
