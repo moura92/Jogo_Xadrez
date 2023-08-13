@@ -84,7 +84,8 @@ public class PartidaXadrez {
 	}
 
 	private Peça fazerMover(Posição origem, Posição destino) {
-		Peça p = tabuleiro.removerPeça(origem);
+		PeçaXadrez p = (PeçaXadrez)tabuleiro.removerPeça(origem);
+		p.aumentarContagemMovimento();
 		Peça peçaCapturada = tabuleiro.removerPeça(destino);
 		tabuleiro.lugarpeça(p, destino);
 
