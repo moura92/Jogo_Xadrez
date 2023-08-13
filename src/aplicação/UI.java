@@ -62,6 +62,10 @@ public class UI {
 		System.out.println();
 		System.out.println("Vez: " + partidaXadrez.getVez());
 		System.out.println("Aguardando jogador: " + partidaXadrez.getJogadorAtual());
+		
+		if(partidaXadrez.getCheck()) {
+			System.out.println("CHECK!");
+		}
 	}
 
 	public static void imprimirtabuleiro(PeçaXadrez[][] peças) {
