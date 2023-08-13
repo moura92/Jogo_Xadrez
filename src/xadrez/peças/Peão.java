@@ -62,7 +62,7 @@ public class Peão extends PeçaXadrez {
 	
 	@Override
 	public String toString() {
-		return "p";
+		return "P";
 	}
 
 }
