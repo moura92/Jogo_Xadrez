@@ -36,35 +36,40 @@ public class UI {
 	public static final String ANSI_CYAN_BACKGROUND = "\u001B[46m";
 	public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
 
-	
-	//https://stackoverflow.com/questions/2979383/java-clear-the-console
-	public static void limparTela() {  //metodo para limpar o tabuleiro anterior.
+	// https://stackoverflow.com/questions/2979383/java-clear-the-console
+	public static void limparTela() { // metodo para limpar o tabuleiro anterior.
 		System.out.print("\033[H\033[2J");
 		System.out.flush();
 	}
-	
+
 	public static PosiçãoXadrez lerPosiçãoXadrez(Scanner sc) {
 		try {
 			String s = sc.nextLine();
 			char coluna = s.charAt(0);
 			int linha = Integer.parseInt(s.substring(1));
 			return new PosiçãoXadrez(coluna, linha);
-		}
-		catch (RuntimeException e) {
-			throw new InputMismatchException("Erro ao instanciar a posição de xadrez. Os valores válidos são de 'a1' a 'h8'");
+		} catch (RuntimeException e) {
+			throw new InputMismatchException(
+					"Erro ao instanciar a posição de xadrez. Os valores válidos são de 'a1' a 'h8'");
 		}
 	}
-	
+
 	public static void imprimirPartida(PartidaXadrez partidaXadrez, List<PeçaXadrez> captura) {
 		imprimirtabuleiro(partidaXadrez.getPeças());
 		System.out.println();
 		imprimirPeçaCapturada(captura);
 		System.out.println();
 		System.out.println("Vez: " + partidaXadrez.getVez());
-		System.out.println("Aguardando jogador: " + partidaXadrez.getJogadorAtual());
-		
-		if(partidaXadrez.getCheck()) {
-			System.out.println("CHECK!");
+
+		if (!partidaXadrez.getCheckMate()) {
+			System.out.println("Aguardando jogador: " + partidaXadrez.getJogadorAtual());
+
+			if (partidaXadrez.getCheck()) {
+				System.out.println("CHECK!");
+			}
+		}else {
+			System.out.println("CHECK MATE !");
+			System.out.println("Vencedor: " + partidaXadrez.getJogadorAtual());
 		}
 	}
 
@@ -91,7 +96,7 @@ public class UI {
 		}
 		System.out.println("  A B C D E F G H");
 	}
-	
+
 	private static void imprimirPeça(PeçaXadrez peça, boolean fundo) {
 		if (fundo) {
 			System.out.print(ANSI_BLUE_BACKGROUND);
@@ -108,19 +113,19 @@ public class UI {
 		}
 		System.out.print(" ");
 	}
-	
+
 	private static void imprimirPeçaCapturada(List<PeçaXadrez> captura) {
 		List<PeçaXadrez> branco = captura.stream().filter(x -> x.getCor() == Cor.branco).collect(Collectors.toList());
 		List<PeçaXadrez> preto = captura.stream().filter(x -> x.getCor() == Cor.preto).collect(Collectors.toList());
 		System.out.println("Peça Capturada: ");
 		System.out.print("Branco: ");
 		System.out.print(ANSI_WHITE);
-		System.out.println(Arrays.toString(branco.toArray())); //jeito para imprimir um Array de valores no java
+		System.out.println(Arrays.toString(branco.toArray())); // jeito para imprimir um Array de valores no java
 		System.out.print(ANSI_RESET);
-		
+
 		System.out.print("Preto: ");
 		System.out.print(ANSI_YELLOW);
-		System.out.println(Arrays.toString(preto.toArray())); //jeito para imprimir um Array de valores no java
+		System.out.println(Arrays.toString(preto.toArray())); // jeito para imprimir um Array de valores no java
 		System.out.print(ANSI_RESET);
 	}
 }

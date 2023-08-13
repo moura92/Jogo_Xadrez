@@ -16,10 +16,10 @@ public class PartidaXadrez {
 	private Cor jogadorAtual;
 	private Tabuleiro tabuleiro;
 	private boolean check;
-	
+	private boolean checkMate;
+
 	private List<Peça> peçasNoTabuleiro = new ArrayList<>();
 	private List<Peça> peçasCapturada = new ArrayList<>();
-
 
 	public PartidaXadrez() {
 		tabuleiro = new Tabuleiro(8, 8);
@@ -27,17 +27,21 @@ public class PartidaXadrez {
 		jogadorAtual = Cor.branco;
 		iniciopartida();
 	}
-	
+
 	public int getVez() {
 		return vez;
 	}
-	
+
 	public Cor getJogadorAtual() {
 		return jogadorAtual;
 	}
-	
+
 	public boolean getCheck() {
 		return check;
+	}
+
+	public boolean getCheckMate() {
+		return checkMate;
 	}
 
 	public PeçaXadrez[][] getPeças() {
@@ -49,12 +53,12 @@ public class PartidaXadrez {
 		}
 		return matriz;
 	}
-	
-	public boolean[][] movimentoPossivel(PosiçãoXadrez posiçãoOrigem){
+
+	public boolean[][] movimentoPossivel(PosiçãoXadrez posiçãoOrigem) {
 		Posição posição = posiçãoOrigem.toPosição();
 		validarPosiçãoOrigem(posição);
 		return tabuleiro.peça(posição).movimentoPossivel();
-		}
+	}
 
 	public PeçaXadrez jogadaXadrezDesempenho(PosiçãoXadrez posiçãoOrigem, PosiçãoXadrez posiçãoDestino) {
 		Posição origem = posiçãoOrigem.toPosição();
@@ -62,15 +66,20 @@ public class PartidaXadrez {
 		validarPosiçãoOrigem(origem);
 		validarPosiçãoDestino(origem, destino);
 		Peça peçaCapturada = fazerMover(origem, destino);
-		
-		if(testeCheck(jogadorAtual)) {
+
+		if (testeCheck(jogadorAtual)) {
 			desfazerMovimento(origem, destino, peçaCapturada);
 			throw new ExceçãoXadrez("Você nao pode se colocar em chek");
 		}
-		
+
 		check = (testeCheck(oponente(jogadorAtual))) ? true : false;
-		
-		proximaVez();
+
+		if (testeCheckMate(oponente(jogadorAtual))) {
+			checkMate = true;
+		} else {
+			proximaVez();
+		}
+
 		return (PeçaXadrez) peçaCapturada;
 	}
 
@@ -78,18 +87,18 @@ public class PartidaXadrez {
 		Peça p = tabuleiro.removerPeça(origem);
 		Peça peçaCapturada = tabuleiro.removerPeça(destino);
 		tabuleiro.lugarpeça(p, destino);
-		
-		if(peçaCapturada != null) {
+
+		if (peçaCapturada != null) {
 			peçasNoTabuleiro.remove(peçaCapturada);
 			peçasCapturada.add(peçaCapturada);
 		}
 		return peçaCapturada;
 	}
-	
+
 	private void desfazerMovimento(Posição origem, Posição destino, Peça capturaPeça) {
-		PeçaXadrez p = (PeçaXadrez)tabuleiro.removerPeça(destino);
+		PeçaXadrez p = (PeçaXadrez) tabuleiro.removerPeça(destino);
 		tabuleiro.lugarpeça(p, origem);
-		
+
 		if (capturaPeça != null) {
 			tabuleiro.lugarpeça(capturaPeça, destino);
 			peçasCapturada.remove(capturaPeça);
@@ -101,8 +110,8 @@ public class PartidaXadrez {
 		if (!tabuleiro.temUmaPeça(posição)) {
 			throw new ExceçãoXadrez("Não há peça na posição de origem");
 		}
-		if (jogadorAtual != ((PeçaXadrez)tabuleiro.peça(posição)).getCor()) {
-							 // Downcast
+		if (jogadorAtual != ((PeçaXadrez) tabuleiro.peça(posição)).getCor()) {
+			// Downcast
 			throw new ExceçãoXadrez("A peça escolhida não é sua");
 		}
 		if (!tabuleiro.peça(posição).existeMovimentoPossivel()) {
@@ -115,23 +124,25 @@ public class PartidaXadrez {
 			throw new ExceçãoXadrez("A peça escolhida não pode se mover para a posição de destino");
 		}
 	}
-	
+
 	private void proximaVez() {
 		vez++;
 		jogadorAtual = (jogadorAtual == Cor.branco) ? Cor.preto : Cor.branco;
-					 // OPERAÇÃO CONDICIONAL TERNARIA:
-					 // se o jogadorAtual for igual a Cor.branco entao ele vai ser Cor.preto caso contrario vai Cor.branco
+		// OPERAÇÃO CONDICIONAL TERNARIA:
+		// se o jogadorAtual for igual a Cor.branco entao ele vai ser Cor.preto caso
+		// contrario vai Cor.branco
 	}
-	
+
 	private Cor oponente(Cor cor) {
 		return (cor == Cor.branco) ? Cor.preto : Cor.branco;
 	}
-	
-	private PeçaXadrez Rei (Cor cor) {
-		List<Peça> lista = peçasNoTabuleiro.stream().filter(x -> ((PeçaXadrez)x).getCor() == cor).collect(Collectors.toList());
+
+	private PeçaXadrez Rei(Cor cor) {
+		List<Peça> lista = peçasNoTabuleiro.stream().filter(x -> ((PeçaXadrez) x).getCor() == cor)
+				.collect(Collectors.toList());
 		for (Peça p : lista) {
 			if (p instanceof Rei) {
-				return (PeçaXadrez)p;
+				return (PeçaXadrez) p;
 			}
 		}
 		throw new IllegalStateException("Não existe Rei " + cor + " no tabuleiro");
@@ -139,7 +150,8 @@ public class PartidaXadrez {
 
 	private boolean testeCheck(Cor cor) {
 		Posição posiçãoRei = Rei(cor).getPosiçãoXadrez().toPosição();
-		List<Peça> peçasOponente = peçasNoTabuleiro.stream().filter(x -> ((PeçaXadrez)x).getCor() == oponente(cor)).collect(Collectors.toList());
+		List<Peça> peçasOponente = peçasNoTabuleiro.stream().filter(x -> ((PeçaXadrez) x).getCor() == oponente(cor))
+				.collect(Collectors.toList());
 		for (Peça p : peçasOponente) {
 			boolean[][] matriz = p.movimentoPossivel();
 			if (matriz[posiçãoRei.getLinha()][posiçãoRei.getColuna()]) {
@@ -148,25 +160,45 @@ public class PartidaXadrez {
 		}
 		return false;
 	}
-	
+
+	private boolean testeCheckMate(Cor cor) {
+		if (!testeCheck(cor)) {
+			return false;
+		}
+		List<Peça> lista = peçasNoTabuleiro.stream().filter(x -> ((PeçaXadrez) x).getCor() == cor)
+				.collect(Collectors.toList());
+		for (Peça p : lista) {
+			boolean[][] matriz = p.movimentoPossivel();
+			for (int i = 0; i < tabuleiro.getLinhas(); i++) {
+				for (int j = 0; j < tabuleiro.getColunas(); j++) {
+					if (matriz[i][j]) {
+						Posição origem = ((PeçaXadrez) p).getPosiçãoXadrez().toPosição();
+						Posição destino = new Posição(i, j);
+						Peça capturaPeça = fazerMover(origem, destino);
+						boolean testeCheck = testeCheck(cor);
+						desfazerMovimento(origem, destino, capturaPeça);
+						if (!testeCheck) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
 	private void colocarNovaPeça(char coluna, int linha, PeçaXadrez peça) {
 		tabuleiro.lugarpeça(peça, new PosiçãoXadrez(coluna, linha).toPosição());
 		peçasNoTabuleiro.add(peça);
 	}
 
 	private void iniciopartida() {
-		colocarNovaPeça('c', 1, new Torre(tabuleiro, Cor.branco));
-		colocarNovaPeça('c', 2, new Torre(tabuleiro, Cor.branco));
-		colocarNovaPeça('d', 2, new Torre(tabuleiro, Cor.branco));
-		colocarNovaPeça('e', 2, new Torre(tabuleiro, Cor.branco));
-		colocarNovaPeça('e', 1, new Torre(tabuleiro, Cor.branco));
-		colocarNovaPeça('d', 1, new Rei(tabuleiro, Cor.branco));
+		colocarNovaPeça('h', 7, new Torre(tabuleiro, Cor.branco));
+		colocarNovaPeça('d', 1, new Torre(tabuleiro, Cor.branco));
+		colocarNovaPeça('e', 1, new Rei(tabuleiro, Cor.branco));
 
-		colocarNovaPeça('c', 7, new Torre(tabuleiro, Cor.preto));
-		colocarNovaPeça('c', 8, new Torre(tabuleiro, Cor.preto));
-		colocarNovaPeça('d', 7, new Torre(tabuleiro, Cor.preto));
-		colocarNovaPeça('e', 7, new Torre(tabuleiro, Cor.preto));
-		colocarNovaPeça('e', 8, new Torre(tabuleiro, Cor.preto));
-		colocarNovaPeça('d', 8, new Rei(tabuleiro, Cor.preto));
+		colocarNovaPeça('b', 8, new Torre(tabuleiro, Cor.preto));
+		colocarNovaPeça('a', 8, new Rei(tabuleiro, Cor.preto));
+
 	}
 }
