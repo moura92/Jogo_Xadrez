@@ -98,7 +98,7 @@ public class Rei extends PeçaXadrez {
 			}
 			//Movimento especial: Roque do lado do rainha(Roque grande)
 			Posição posiçãoTorre2 =  new Posição(posição.getLinha(), posição.getColuna() - 4);
-			if (testeTorreRock(posiçãoTorre1)) {
+			if (testeTorreRock(posiçãoTorre2)) {
 				Posição p1 = new Posição(posição.getLinha(), posição.getColuna() - 1);
 				Posição p2 = new Posição(posição.getLinha(), posição.getColuna() - 2);
 				Posição p3 = new Posição(posição.getLinha(), posição.getColuna() - 3);
