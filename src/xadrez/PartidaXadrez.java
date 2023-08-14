@@ -1,5 +1,6 @@
 package xadrez;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +23,7 @@ public class PartidaXadrez {
 	private boolean check;
 	private boolean checkMate;
 	private PeçaXadrez enPassantVulnerable;
+	private PeçaXadrez promoção;
 
 	private List<Peça> peçasNoTabuleiro = new ArrayList<>();
 	private List<Peça> peçasCapturada = new ArrayList<>();
@@ -48,9 +50,13 @@ public class PartidaXadrez {
 	public boolean getCheckMate() {
 		return checkMate;
 	}
-	
+
 	public PeçaXadrez getEnPassantVulnerable() {
 		return enPassantVulnerable;
+	}
+
+	public PeçaXadrez getPromoção() {
+		return promoção;
 	}
 
 	public PeçaXadrez[][] getPeças() {
@@ -81,8 +87,18 @@ public class PartidaXadrez {
 			throw new ExceçãoXadrez("Você nao pode se colocar em chek");
 		}
 
-		PeçaXadrez peçaMovida = (PeçaXadrez)tabuleiro.peça(destino);
-		
+		PeçaXadrez peçaMovida = (PeçaXadrez) tabuleiro.peça(destino);
+
+		// movimento especial: promoção
+		promoção = null;
+		if (peçaMovida instanceof Peão) {
+			if (peçaMovida.getCor() == Cor.branco && destino.getLinha() == 0
+					|| peçaMovida.getCor() == Cor.preto && destino.getLinha() == 7) {
+				promoção = (PeçaXadrez) tabuleiro.peça(destino);
+				promoção = substituirPeçaPromoção("Q");
+			}
+		}
+
 		check = (testeCheck(oponente(jogadorAtual))) ? true : false;
 
 		if (testeCheckMate(oponente(jogadorAtual))) {
@@ -91,15 +107,43 @@ public class PartidaXadrez {
 			proximaVez();
 		}
 
-		//Movimento Especial: en passant
-		if (peçaMovida instanceof Peão && (destino.getLinha() == origem.getLinha() - 2 || destino.getLinha() == origem.getLinha() +2)) {
+		// Movimento Especial: en passant
+		if (peçaMovida instanceof Peão
+				&& (destino.getLinha() == origem.getLinha() - 2 || destino.getLinha() == origem.getLinha() + 2)) {
 			enPassantVulnerable = peçaMovida;
-		}else {
+		} else {
 			enPassantVulnerable = null;
 		}
-		
-		
+
 		return (PeçaXadrez) peçaCapturada;
+	}
+
+	public PeçaXadrez substituirPeçaPromoção(String tipo) {
+		if (promoção == null) {
+			throw new IllegalStateException("Não há peça para ser promoção");
+		}
+		if (!tipo.equals("B") && !tipo.equals("C") && !tipo.equals("R") && !tipo.equals("Q")) {
+			throw new InvalidParameterException("Tipo inválido para promoção");
+		}
+		Posição pos = promoção.getPosiçãoXadrez().toPosição();
+		Peça p = tabuleiro.removerPeça(pos);
+		peçasNoTabuleiro.remove(p);
+
+		PeçaXadrez novaPeça = novaPeça(tipo, promoção.getCor());
+		tabuleiro.lugarpeça(novaPeça, pos);
+		peçasNoTabuleiro.add(novaPeça);
+
+		return novaPeça;
+	}
+
+	private PeçaXadrez novaPeça(String tipo, Cor cor) {
+		if (tipo.equals("B"))
+			return new Bispo(tabuleiro, cor);
+		if (tipo.equals("C"))
+			return new Cavalo(tabuleiro, cor);
+		if (tipo.equals("Q"))
+			return new Rainha(tabuleiro, cor);
+		return new Torre(tabuleiro, cor);
 	}
 
 	private Peça fazerMover(Posição origem, Posição destino) {
@@ -136,12 +180,12 @@ public class PartidaXadrez {
 		}
 
 		// Movimento especial: en passant
-		if(p instanceof Peão) {
-			if(origem.getColuna() != destino.getColuna() && peçaCapturada == null) {
+		if (p instanceof Peão) {
+			if (origem.getColuna() != destino.getColuna() && peçaCapturada == null) {
 				Posição posiçãoPeão;
-				if(p.getCor() == Cor.branco) {
+				if (p.getCor() == Cor.branco) {
 					posiçãoPeão = new Posição(destino.getLinha() + 1, destino.getColuna());
-				}else {
+				} else {
 					posiçãoPeão = new Posição(destino.getLinha() - 1, destino.getColuna());
 				}
 				peçaCapturada = tabuleiro.removerPeça(posiçãoPeão);
@@ -149,7 +193,7 @@ public class PartidaXadrez {
 				peçasNoTabuleiro.remove(peçaCapturada);
 			}
 		}
-		
+
 		return peçaCapturada;
 	}
 
@@ -185,15 +229,15 @@ public class PartidaXadrez {
 			torre.diminuirContagemMovimento();
 
 		}
-		
+
 		// Movimento especial: en passant
-		if(p instanceof Peão) {
-			if(origem.getColuna() != destino.getColuna() && peçaCapturada == enPassantVulnerable) {
-				PeçaXadrez peão = (PeçaXadrez)tabuleiro.removerPeça(destino);
+		if (p instanceof Peão) {
+			if (origem.getColuna() != destino.getColuna() && peçaCapturada == enPassantVulnerable) {
+				PeçaXadrez peão = (PeçaXadrez) tabuleiro.removerPeça(destino);
 				Posição posiçãoPeão;
-				if(p.getCor() == Cor.branco) {
+				if (p.getCor() == Cor.branco) {
 					posiçãoPeão = new Posição(3, destino.getColuna());
-				}else {
+				} else {
 					posiçãoPeão = new Posição(4, destino.getColuna());
 				}
 				tabuleiro.lugarpeça(peão, posiçãoPeão);
