@@ -29,34 +29,37 @@ public class Programa {
 				boolean[][] movimentoPossivel = partidaXadrez.movimentoPossivel(origem);
 				UI.limparTela();
 				UI.imprimirtabuleiro(partidaXadrez.getPeças(), movimentoPossivel);
-				
+
 				System.out.println();
 				System.out.print("Destino: ");
 				PosiçãoXadrez destino = UI.lerPosiçãoXadrez(sc);
 
 				PeçaXadrez peçaCapturada = partidaXadrez.jogadaXadrezDesempenho(origem, destino);
-				
-				if(peçaCapturada != null) {
+
+				if (peçaCapturada != null) {
 					captura.add(peçaCapturada);
 				}
-				
-				if( partidaXadrez.getPromoção() != null) {
-					System.out.println("Digite a peça da Promoção (B - C - R - Q): ");
-					String tipo = sc.nextLine();
+
+				if (partidaXadrez.getPromoção() != null) {
+					System.out.print("Digite a peça da Promoção (B - C - R - Q): ");
+					String tipo = sc.nextLine().toUpperCase();// toUpperCase() -> converte a letra que o usuario digitar
+																// para maiuscula.
+					while (!tipo.equals("B") && !tipo.equals("C") && !tipo.equals("R") && !tipo.equals("Q")) {
+						System.out.print("Comando Inválido! Digite a peça da Promoção (B - C - R - Q): ");
+						tipo = sc.nextLine().toUpperCase();
+					}
 					partidaXadrez.substituirPeçaPromoção(tipo);
 				}
-			} 
-			catch (ExceçãoXadrez e) {
+			} catch (ExceçãoXadrez e) {
 				System.out.println(e.getMessage());
 				sc.nextLine();
-			}
-			catch (InputMismatchException e) {
+			} catch (InputMismatchException e) {
 				System.out.println(e.getMessage());
 				sc.nextLine();
 			}
 		}
 		UI.limparTela();
 		UI.imprimirPartida(partidaXadrez, captura);
-		
+
 	}
 }
